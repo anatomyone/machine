@@ -2,9 +2,11 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/docker/machine/drivers/virtualbox"
 	"github.com/docker/machine/libmachine"
@@ -45,7 +47,9 @@ func create() {
 
 	h.HostOptions.EngineOptions.StorageDriver = "overlay"
 
-	if err := client.Create(h); err != nil {
+	ctx, cancelFunc := context.WithTimeout(context.Background(), 180*time.Second)
+	defer cancelFunc()
+	if err := client.Create(ctx, h); err != nil {
 		log.Error(err)
 		return
 	}
@@ -88,7 +92,9 @@ func streaming() {
 		return
 	}
 
-	if err := client.Create(h); err != nil {
+	ctx, cancelFunc := context.WithTimeout(context.Background(), 180*time.Second)
+	defer cancelFunc()
+	if err := client.Create(ctx, h); err != nil {
 		log.Error(err)
 		return
 	}

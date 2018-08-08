@@ -1,6 +1,8 @@
 package libmachinetest
 
 import (
+	"context"
+
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
@@ -24,7 +26,7 @@ func (api *FakeAPI) NewHost(driverName string, rawDriver []byte) (*host.Host, er
 	return nil, nil
 }
 
-func (api *FakeAPI) Create(h *host.Host) error {
+func (api *FakeAPI) Create(ctx context.Context, h *host.Host) error {
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -130,6 +131,11 @@ var (
 			Usage: "Support extra SANs for TLS certs",
 			Value: &cli.StringSlice{},
 		},
+		cli.IntFlag{
+			Name:  "ready-timeout",
+			Usage: "Maximum time in seconds to wait for created machine to become ready",
+			Value: 180,
+		},
 	}
 )
 
@@ -225,7 +231,9 @@ func cmdCreateInner(c CommandLine, api libmachine.API) error {
 		return fmt.Errorf("Error setting machine configuration from flags provided: %s", err)
 	}
 
-	if err := api.Create(h); err != nil {
+	ctx, cancelFunc := context.WithTimeout(context.Background(), time.Duration(c.Int("ready-timeout"))*time.Second)
+	defer cancelFunc()
+	if err := api.Create(ctx, h); err != nil {
 		// Wait for all the logs to reach the client
 		time.Sleep(2 * time.Second)
 

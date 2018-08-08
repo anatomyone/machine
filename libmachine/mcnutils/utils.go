@@ -1,6 +1,7 @@
 package mcnutils
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -100,6 +101,27 @@ func WaitForSpecific(f func() bool, maxAttempts int, waitInterval time.Duration)
 
 func WaitFor(f func() bool) error {
 	return WaitForSpecific(f, 60, 3*time.Second)
+}
+
+// WaitForWithContext retries f forever until it returns true or context
+// cancels
+func WaitForWithContext(ctx context.Context, f func() bool) error {
+	if f() {
+		return nil
+	}
+	t := time.NewTicker(3 * time.Second)
+	defer t.Stop()
+	for {
+		select {
+		case <-t.C:
+			if f() {
+				return nil
+			}
+		case <-ctx.Done():
+			// Context cancelled
+			return ctx.Err()
+		}
+	}
 }
 
 // TruncateID returns a shorten id
